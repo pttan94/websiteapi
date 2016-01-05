@@ -193,6 +193,5 @@ F:\Git\websiteapi\WebAPI\bin\Microsoft.Owin.Security.Google.xml
 F:\Git\websiteapi\WebAPI\bin\Microsoft.Owin.Security.Twitter.xml
 F:\Git\websiteapi\WebAPI\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 F:\Git\websiteapi\WebAPI\bin\System.Web.Http.Owin.xml
-F:\Git\websiteapi\WebAPI\obj\Debug\WebAPI.csprojResolveAssemblyReference.cache
 F:\Git\websiteapi\WebAPI\obj\Debug\WebAPI.dll
 F:\Git\websiteapi\WebAPI\obj\Debug\WebAPI.pdb
