@@ -1,0 +1,27 @@
+﻿
+
+<ul class="megamenu skyblue" ng-controller="MenuPartialCtrl" >
+    <li class="active grid"><a class="color1" href="/">Home</a></li>
+
+    <li ng-repeat="cate in Categories">
+        <a class="color2" href="~/ProductCategory/Detail?CategoryID={{cate.CategoryID}}">{{cate.Name}}</a>
+    </li>
+</ul>
+
+
+
+<script type="text/javascript">
+    //var app = angular.module('myApp', []);
+    app.controller('MenuPartialCtrl', function ($scope, $http) {
+        $http.get(baseAPIUrl+"api/ProductCategory?KeyWord=MenuCategory")
+        .success(function (response) {
+            $scope.Categories = response;
+
+        })
+        .error(function (error) {
+            alert(error);
+        });
+    });
+
+</script>
+

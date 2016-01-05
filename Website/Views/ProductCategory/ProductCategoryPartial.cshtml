@@ -1,0 +1,23 @@
+﻿
+<div class="w_nav1" ng-controller="CategoryPartialCtrl">
+    <h4>Categories</h4>
+    <ul >
+        <li ng-repeat="cate in ProductCategories">
+            <a href="~/ProductCategory/Detail?CategoryID={{cate.CategoryID}}">{{cate.Name}}</a>
+        </li>
+    </ul>
+</div>
+
+
+<script type="text/javascript">
+    //var app = angular.module('myApp', []);
+    app.controller('CategoryPartialCtrl', function ($scope, $http) {
+        $http.get(baseAPIUrl+"/api/ProductCategory?KeyWord=MainCategory")
+        .success(function (response) {
+            $scope.ProductCategories = response;
+        })
+        .error(function (error) { alert(error); });
+    });
+
+</script>
+

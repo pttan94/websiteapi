@@ -1,0 +1,108 @@
+﻿
+@{
+    ViewBag.Title = "Client Website";
+}
+
+<div class="arriv" ng-controller="CategoryHomeCtrl">
+    <div class="container">
+
+        <div class="">
+            <div class="col-md-4" ng-repeat="c in Categories">
+                <img src="{{c.Image}}" class="img-responsive" alt="{{c.Name}}">
+                <div class="arriv-info2">
+                    <a href="~/ProductCategory/Detail?CategoryID={{c.CategoryID}}"><h3>{{c.Name}}<i class="ars"></i></h3></a>
+                </div>
+            </div>
+
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="special" >
+    <div class="container">
+        <h3>Special Offers</h3>
+        <div class="specia-top">
+            <ul class="grid_2" ng-controller="SaleOffCtrl">
+                <li ng-repeat="p in Product">
+                    <a href="~/Product/Detail?ProductID={{p.ProductID}}"><img src="{{p.Image}}" class="img-responsive" alt=""></a>
+                    <div class="special-info grid_1 simpleCart_shelfItem">
+                        <h5>{{p.Name}}</h5>
+                        <div class="item_add"><span class="item_price"><h6>{{p.Price}}</h6></span></div>
+                        <div class="item_add"><span class="item_price"><a href="javascript:void(0)" ng-click="addToCart(p.ProductID)">add to cart</a></span></div>
+                    </div>
+                </li>
+
+
+
+            </ul>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+   
+    app.controller('SaleOffCtrl', function ($scope, $http) {
+        $http.get(baseAPIUrl + "api/Product?UK=SaleOff")
+        .success(function (response) {
+            $scope.Product = response;
+        })
+        .error(function (error) { alert("SaleOffCtrl " + error); });
+        $scope.addToCart = function (productID) {
+            $scope.isHaveItem = 0;
+            $scope.Quantity = 1;
+            console.log($window.sessionStorage.length);
+
+            if ($window.sessionStorage.length > 0) {
+                for (var i = 0, len = sessionStorage.length; i < len; i++) {
+                    var temp = $window.sessionStorage.getItem(sessionStorage.key(i));
+                    var item = JSON.parse(temp);
+                    console.log('loop' + item.ProductID);
+                    if (item.ProductID == productID) {
+                        $scope.isHaveItem = 1;
+                        break;
+                    }
+                }
+            }
+            $scope.currentProduct = null;
+            $http.get(baseAPIUrl + "api/Product?ProductID=" + productID)
+            .success(function (response) {
+                $scope.currentProduct = response;
+                console.log(response);
+                console.log($scope.currentProduct.Name);
+                if ($scope.isHaveItem == 0) {
+                    json = {
+                        ProductID: productID,
+                        Name: $scope.currentProduct.Name,
+                        Image: $scope.currentProduct.Image,
+                        Price: $scope.currentProduct.Price,
+                        Quantity: $scope.Quantity
+                    }
+
+                    console.log($scope.currentProduct.Name, $scope.currentProduct.Image, $scope.currentProduct.ProductID);
+                    $window.sessionStorage.setItem(productID, JSON.stringify(json));
+                    window.alert("Add to Cart success!");
+                }
+                else {
+                    window.alert("This product is already in cart! Please try with another product!");
+                }
+
+            })
+            .error(function (error) {
+
+                alert("ProductCartCtrl " + error);
+            });
+
+        };
+    }).controller('CategoryHomeCtrl', function ($scope, $http) {
+        $http.get(baseAPIUrl + "api/ProductCategory?KeyWord=MenuCategory")
+        .success(function (response) {
+            $scope.Categories = response;
+        })
+        .error(function (error) {
+            alert(error);
+        });
+    });
+
+</script>

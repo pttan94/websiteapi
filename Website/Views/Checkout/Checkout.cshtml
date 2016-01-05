@@ -1,0 +1,272 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Checkout</title>
+    <script src="~/Content/js/angular.min.js"></script>
+    <script src="~/Content/js/jquery-1.11.1.min.js"></script>
+    <link href="~/Content/thanhtoan/css/style.css" rel="stylesheet" />
+    <link href="~/Content/thanhtoan/css/bootstrap.css" rel="stylesheet" />
+    <script src="~/Content/thanhtoan/js/bootstrap.min.js"></script>
+    <link href="~/Content/thanhtoan/check_out.css" rel="stylesheet" />
+    <link href="~/Content/thanhtoan/fonts/fontsstyle.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="outer" ng-app="myApp">
+        <script type="text/javascript">
+            var app = angular.module('myApp', []);
+            var baseAPIUrl = "@System.Web.Configuration.WebConfigurationManager.AppSettings["APIHost"]";
+        </script>
+@if (Request.IsAuthenticated)
+{
+        <div class="container">
+            <h1 style="color:#000;">
+                Website
+            </h1>
+            <a href="/">Back</a>
+            <div class="content" ng-controller="PaymentController">
+                <div class="row">
+                    <div class="cart-left">
+                        <h2>Checkout Info</h2>
+                        <div class="form-info" >
+                            <div class="new_order" id="forminfo">
+                                <div class="form-group">
+                                    <input id="txtName" placeholder="Full name" class="formcontrol" size="30" readonly value="@User.Identity.Name" />
+                                    <p><span class="Red">*</span></p>
+                                </div>
+                                <div class="form-group">
+                                    <input id="txtPhone" placeholder="Phone Number" class="formcontrol" maxlength="11" size="30" />
+                                    <p><span class="Red">*</span></p>
+                                </div>
+                                <div class="form-group">
+                                    <input id="txtAddress" placeholder="Address" class="formcontrol" size="30" required />
+                                    <p><span class="Red">*</span></p>
+                                </div>
+                                <div class="form-group">
+                                    <input id="txtNote" placeholder="Remark" class="formcontrol ordernote" textmode="MultiLine" />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="listerror">
+                        </div>
+                    </div>
+
+                    <div class="cart-center">
+                        <h3>Payment Method</h3>
+                        <div class="shiping-ajax">
+                            <label class="lb-method">
+                                <input id="rdoPaymentType_Delivery" checked="checked" class="input-method" type="radio" name="gateway" onclick="ChangeDesc(1);" />
+                                <span id="radio1" class="label-radio checked">Cash On Delivery</span>
+                            </label>
+                            <span id="desc1" class="desc"></span>
+
+                            <label class="lb-method">
+                                <input id="rdoPaymentType_Cast" class="input-method" type="radio" name="gateway" onclick="ChangeDesc(2);" />
+                                <span id="radio2" class="label-radio">Payment by bank transfer</span>
+                            </label>
+                            <span id="desc2" class="desc"></span>
+
+                            <div>
+                                <label class="lb-method">
+                                    <input id="rdoPaymentType_Factory" class="input-method" type="radio" name="gateway" onclick="ChangeDesc(3);" />
+                                    <span id="radio3" class="label-radio">Payment in warehouse</span>
+                                </label>
+                                <span id="desc3" class="desc"></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="cart-right">
+                        <div class="box-cart" ng-controller="cartController">
+                            <h2>Order</h2>(<span>{{numcart}}</span> Product)
+                            <div class="cart-items clearfix">
+                                <div class="list_item cart-item clearfix" ng-repeat="cart in Carts">
+                                    <span>{{cart.Quantity}} x</span>
+                                    <span>{{cart.Name}}</span>
+                                    <span class="price">${{cart.Price}}</span>
+                                </div>
+                            </div>
+                            <div class="total-price">
+                                Total Amount Before Ship <label>{{totalPrice}}</label>
+                            </div>
+                            <div class="shiping-price">
+                                Shipping <label>0</label>
+                            </div>
+                            <div class="total-checkout">
+                                Total Amount Order <span>{{totalPrice}}</span>
+                            </div>
+                        </div>
+                        <div class="subutton">
+                            <button style="cursor: pointer;" class="btn-checkout">Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="shipInfo" style="display: none;">
+                <div id="BuyerInfo" style="margin-bottom: 10px;">
+                    <div style="margin-top: 20px; font-size: 15pt; font-weight: bold;">
+                        Đơn hàng:
+                        <%="{0}"%>
+                    </div>
+                    <div>
+                        Tình trạng: complete
+                    </div>
+                    <div>
+                        Ngày:
+                        <%="{1:dd/MM/yyyy hh:mm:ss}"%>
+                    </div>
+                    <div>
+                        Hình thức giao dịch:
+                        <%="{2}"%>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 15pt; font-weight: bold;">
+                        Hàng giao đến:
+                    </div>
+                    <div>
+                        <%="{3}"%>
+                    </div>
+                    <div>
+                        <%="{4}"%>
+                    </div>
+                    <div>
+                        <%="{5}"%>
+                    </div>
+                    <div>
+                        <%="{6}"%>
+                    </div>
+                    <div>
+                        Ghi chú:
+                        <%="{7}"%>
+                    </div>
+                </div>
+            </div>
+            <div id="divCartInfo" style="display: none">
+                <div id="Bill">
+                    <table id="table_cart2" border="0" cellspacing="0" cellpadding="0" width="100%" class="table_cart table table-bordered cart">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding: 5px; border: 1px solid #999;">
+                                    Sản phẩm
+                                </th>
+                                <th style="text-align: right; padding: 5px; border: 1px solid #999;">
+                                    Thành tiền
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <asp:repeater id="rpt_bill">
+                                <itemtemplate>
+                                    <tr>
+                                        <td class="pro-title" style="text-align: left; padding: 5px; border: 1px solid #999;">
+
+                                            <%#Eval("Quantity")%> x   <%#Eval("Name")%>
+                                        </td>
+                                        <td class="pro-price" style="text-align: right; padding: 5px; border: 1px solid #999;">
+                                            <span id='label_<%#Eval("ProductID")%>'>
+                                                <%#Eval("Sum", "{0:N0}")%>
+                                                VNĐ
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </itemtemplate>
+                            </asp:repeater>
+                            <tr>
+                                <td class="pro-price" style="text-align: left; padding: 5px; border: 1px solid #999;">
+                                    Phí vận chuyển:
+                                </td>
+                                <td class="pro-price" style="text-align: right; padding: 5px; border: 1px solid #999;">
+                                    0 VNĐ
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="pro-price" style="text-align: left; padding: 5px; border: 1px solid #999; font-weight: bold">
+                                    Tổng tiền thanh toán:
+                                </td>
+                                <td class="pro-price" style="text-align: right; padding: 5px; border: 1px solid #999; font-weight: bold">
+                                    <p id="lblTotal" font-bold="true"></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+}
+else
+{
+    <div class="container">
+        <h1 style="color:#000;">
+            Please Login
+        </h1>
+        <a href="/">Back to Home</a>
+    </div>
+}
+
+    </div>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#desc1").fadeIn(500);
+
+        });
+        function ChangeDesc(id) {
+            $(".label-radio").removeClass("checked");
+            $("#radio" + id).addClass("checked");
+
+            $(".desc").hide().fadeOut(500);
+            $("#desc" + id).fadeIn(500);;
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        app.controller('cartController', function ($scope, $http, $window) {
+            console.log($window.sessionStorage.length);
+            $scope.Carts = [];
+            $scope.numcart = 0;
+            $scope.totalPrice = 0;
+            if ($window.sessionStorage.length > 0) {
+
+                for (var i = 0, len = sessionStorage.length; i < len; i++) {
+                    var temp = $window.sessionStorage.getItem(sessionStorage.key(i));
+                    var item = JSON.parse(temp);
+
+                    $scope.Carts.push(item);
+                    $scope.numcart ++;
+                    $scope.totalPrice += (item.Price * item.Quantity);
+                }
+            }
+        }).controller("PaymentController", function ($scope, $http) {
+
+            var config = {
+                headers: {
+                    "CommandType": "AddNewOrder"
+                }
+            };
+
+            $scope.addorder = function () {
+                $http.post(baseAPIUrl + '/api/Order', $scope.order, config)
+                .success(function (response) {
+                    alert("Saved successfully.");
+                })
+                .error(function (error) {
+                    alert("MSSV đã tồn tại!");
+                });
+            };
+        });
+
+    </script>
+
+</body>
+</html>

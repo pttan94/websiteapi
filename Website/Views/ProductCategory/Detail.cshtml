@@ -1,0 +1,145 @@
+﻿
+@{
+    ViewBag.Title = "ProductCategory Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model int 
+
+
+<div class="container">
+    <div class="women_main">
+        <!-- start sidebar -->
+        <div class="col-md-3 s-d">
+            <div class="w_sidebar">
+                @Html.Action("ProductCategoryPartial", "ProductCategory")
+                <h3>filter by</h3>
+                <section class="sky-form">
+                    <h4>Price</h4>
+                    <div class="row1 scroll-pane">
+                        <div class="col col-4">
+                            <label class="checkbox"><input type="checkbox" name="checkbox" value="0-20"><i></i> &lt; 20$</label>
+                            <label class="checkbox"><input type="checkbox" name="checkbox" value="20-60"><i></i>20-60$</label>
+                            <label class="checkbox"><input type="checkbox" name="checkbox" value="60-100"><i></i>60-100$</label>
+                            <label class="checkbox"><input type="checkbox" name="checkbox" value="100-10000000"><i></i> &gt; 100$</label>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+        <!-- start content -->
+        <div class="col-md-9 w_content">
+            <div class="women" ng-controller="CategoryDetailCtrl">
+                <h4>{{ProductCategory.Name}}<span></span></h4>
+                <ul class="w_nav">
+                    <li>Sort : </li>
+                    <li><a class="active" href="#">popular</a></li> |
+                    <li><a href="#">new </a></li> |
+                    <li><a href="#">discount</a></li> |a
+                    <li><a href="#">price: Low High </a></li>
+                    <div class="clear"></div>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- grids_of_4 -->
+            <div class="grids_of_4" ng-controller="ProductListCtrl" >
+                <div class="grid1_of_4" ng-repeat="product in Products">
+                    <div class="content_box">
+                        <a href="~/Product/Detail?ProductID={{product.ProductID}}">
+                            <img src="{{product.Image}}" class="img-responsive" alt="" />
+                        </a>
+                        <h4><a href="~/Product/Detail?ProductID={{product.ProductID}}">{{product.Name}}</a></h4>
+                        <p>{{product.MetaDescription}}</p>
+                        <div class="grid_1 simpleCart_shelfItem">
+                            <div class="item_add"><span class="item_price"><h6>${{product.Price}}</h6></span></div>
+                            <div class="item_add"><span class="item_price"><a href="javascript:void(0)" ng-click="addToCart(product.ProductID)">add to cart</a></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+
+            <!-- end grids_of_4 -->
+
+
+        </div>
+        <div class="clearfix"></div>
+
+        <!-- end content -->
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    //var app = angular.module('myApp', []);
+    app.controller('CategoryDetailCtrl', function ($scope, $http) {
+        $http.get(baseAPIUrl+"api/ProductCategory?CategoryID=@Model")
+        .success(function (response) {
+            $scope.ProductCategory = response;
+            document.title =$scope.ProductCategory.Name;
+        })
+        .error(function (error) { alert( "CategoryDetailCtrl "+ error); });
+    });
+
+    app.controller('ProductListCtrl', function ($scope, $http, $window) {
+        $http.get(baseAPIUrl+"api/Product?CategoryID=@Model")
+        .success(function (response) {
+            $scope.Products = response;
+        })
+        .error(function (error) {
+            alert("ProductListCtrl " + error);
+        });
+        $scope.addToCart = function (productID) {
+            $scope.isHaveItem = 0;
+            $scope.Quantity = 1;
+            console.log($window.sessionStorage.length);
+
+            if ($window.sessionStorage.length > 0) {
+                for (var i = 0, len = sessionStorage.length; i < len; i++)
+                {
+                    var temp = $window.sessionStorage.getItem(sessionStorage.key(i));
+                    var item = JSON.parse(temp);
+                    console.log('loop'+item.ProductID);
+                    if (item.ProductID == productID) {
+                        $scope.isHaveItem = 1;
+                        break;
+                    }
+                }
+            }
+            $scope.currentProduct = null;
+            $http.get(baseAPIUrl + "api/Product?ProductID=" + productID)
+            .success(function (response) {
+                $scope.currentProduct = response;
+                console.log(response);
+                console.log($scope.currentProduct.Name);
+                if ($scope.isHaveItem == 0) {
+                    json = {
+                        ProductID: productID,
+                        Name: $scope.currentProduct.Name,
+                        Image: $scope.currentProduct.Image,
+                        Price: $scope.currentProduct.Price,
+                        Quantity: $scope.Quantity
+                    }
+
+                    console.log($scope.currentProduct.Name, $scope.currentProduct.Image, $scope.currentProduct.ProductID);
+                    $window.sessionStorage.setItem(productID, JSON.stringify(json));
+                    window.alert("Add to Cart success!");
+                }
+                else {
+                    window.alert("This product is already in cart! Please try with another product!");
+                }
+
+            })
+            .error(function (error) {
+              
+                alert("ProductCartCtrl " + error);
+            });
+            
+        };
+    });
+
+</script>

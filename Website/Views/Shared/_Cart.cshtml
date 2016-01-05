@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNet.Identity
+
+<div class="cart box_1" ng-controller="numcartController">
+    <a href="~/Cart/Detail">
+        <h3> $<span ng-bind="totalPrice"> </span> (<span id="simpleCart_quantity" class="">{{numcart}}</span> items)<img src="~/Content/images/bag.png" alt=""></h3>
+    </a>
+
+    <div class="clearfix"> </div>
+</div>
+@if (Request.IsAuthenticated)
+{
+    <div class="create_btn">
+        <a href="~/Checkout/Detail">CHECKOUT</a>
+    </div>
+}
+else
+{
+    <div class="create_btn">
+        @Html.ActionLink("CHECKOUT", "Login", "Account")
+    </div>
+}
+
+
+<script type="text/javascript">
+    app.controller('numcartController', function ($scope, $http,  $window) {
+        console.log($window.sessionStorage.length);
+        $scope.numcart = 0;
+        var total = 0;
+        if ($window.sessionStorage.length > 0) {
+            for (var j = 0, len = sessionStorage.length; j < len; j++)
+            {
+                var temp = $window.sessionStorage.getItem(sessionStorage.key(j));
+                var item = JSON.parse(temp);
+                console.log(temp);
+                $scope.numcart += item.Quantity;
+                total += (item.Price * item.Quantity);
+
+                console.log(total);
+            }
+        }
+        console.log('total: '+total);
+        $scope.totalPrice = total;
+    });
+</script>
